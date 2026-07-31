@@ -1,0 +1,96 @@
+name: Build and publish roadmap dashboard
+
+# Runs automatically when you upload a new workbook (any push that touches the
+# data folder, the config, or the build scripts), and can also be started by
+# hand from the Actions tab.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "data/**"
+      - "config.yml"
+      - "scripts/**"
+      - ".github/workflows/build-dashboard.yml"
+  workflow_dispatch:
+    inputs:
+      current_release:
+        description: "Current release (orange in Latest Release). Blank = use the workbook/config value."
+        required: false
+        type: string
+      uat_date:
+        description: "Date the current release went to UAT, e.g. 06 June 2026"
+        required: false
+        type: string
+      dev_release:
+        description: "Release currently in development, e.g. 0.25"
+        required: false
+        type: string
+      next_uat_date:
+        description: "When that release reaches UAT, e.g. August 2026"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# If you upload twice in a row, let the newer run finish and cancel the older.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build dashboard
+        env:
+          DASH_CURRENT_RELEASE: ${{ inputs.current_release }}
+          DASH_UAT_DATE: ${{ inputs.uat_date }}
+          DASH_DEV_RELEASE: ${{ inputs.dev_release }}
+          DASH_NEXT_UAT_DATE: ${{ inputs.next_uat_date }}
+        run: python scripts/build_dashboard.py
+
+      - name: Check the page was produced
+        run: |
+          test -s docs/index.html || { echo "docs/index.html is missing or empty"; exit 1; }
+          echo "Built $(du -h docs/index.html | cut -f1) dashboard"
+
+      # Keeps a downloadable copy on every run, so you can grab the HTML file
+      # even if you would rather email it than link to Pages.
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: roadmap-dashboard-html
+          path: docs/index.html
+          retention-days: 90
+
+      - name: Package for GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Summary
+        run: echo "Dashboard published to ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
