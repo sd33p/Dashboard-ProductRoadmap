@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__PAGE_TITLE__</title>
+<style>
+  :root{
+    --blue: __C_BLUE__;
+    --page-blue: __C_PAGE_BLUE__;
+    --ink: __C_INK__;
+    --group-grey: __C_GROUP_GREY__;
+    --na-text: __C_NA_TEXT__;
+    --btn-orange: __C_BTN_ORANGE__;
+    --btn-purple: __C_BTN_PURPLE__;
+    --btn-green: __C_BTN_GREEN__;
+    --panel-radius: 2px;
+    --font-ui: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-num: "Consolas", "SFMono-Regular", "Menlo", monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--page-blue);
+    color:var(--ink);
+    font-family:var(--font-ui);
+    font-size:13px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{padding:10px;display:flex;flex-direction:column;gap:10px;min-height:100vh}
+
+  /* ---------- masthead ---------- */
+  .masthead{display:flex;gap:10px;align-items:stretch}
+  .logo{
+    background:#fff;border:1px solid #fff;padding:10px 22px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    min-width:200px;
+  }
+  .logo svg{width:34px;height:44px}
+  .logo span{font-weight:700;font-size:11px;letter-spacing:.06em;color:#0a3f8f}
+  .title-bar{
+    flex:1;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;
+    text-align:center;padding:18px 24px;
+  }
+  .title-bar h1{margin:0;font-size:26px;font-weight:700;letter-spacing:.01em}
+
+  /* ---------- info + legend ---------- */
+  .info-row{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:10px;align-items:stretch}
+  .panel{background:#fff;padding:16px 18px}
+  .panel p{margin:0 0 12px}
+  .panel p:last-child{margin-bottom:0}
+  .release-status{
+    margin-top:14px;border-top:1px solid #e3e3e3;padding-top:12px;
+    display:grid;gap:8px;
+  }
+  .rs-item{display:flex;gap:10px;align-items:baseline;line-height:1.45}
+  .rs-label{
+    flex:0 0 auto;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:#6b7b8c;min-width:150px;
+  }
+  .rs-value{font-weight:600}
+  .rs-value .num{font-family:var(--font-num);background:#eef4fc;padding:1px 6px;border:1px solid #d3e2f5}
+
+  .legend h2{margin:0 0 12px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#6b7b8c;font-weight:700}
+  .legend-item{margin-bottom:12px}
+  .legend-item:last-child{margin-bottom:0}
+  .swatch{font-weight:700;padding:2px 6px;border:1px solid rgba(0,0,0,.12)}
+  .legend-item .desc{margin:4px 0 0;font-size:11.5px;color:#555;line-height:1.4}
+
+  /* ---------- stats ---------- */
+  .stats{display:flex;flex-wrap:wrap;gap:8px}
+  .stat{
+    background:#fff;border:none;padding:10px 16px;cursor:pointer;text-align:left;
+    font-family:inherit;color:inherit;border-left:4px solid transparent;min-width:132px;
+  }
+  .stat:hover{outline:2px solid var(--blue);outline-offset:-2px}
+  .stat[aria-pressed="true"]{outline:2px solid var(--blue);outline-offset:-2px}
+  .stat .n{display:block;font-size:22px;font-weight:700;font-family:var(--font-num);line-height:1.1}
+  .stat .k{display:block;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:#6b7b8c;margin-top:3px}
+  .stat.total{border-left-color:var(--blue)}
+  .stat.complete{border-left-color:#238b3b}
+  .stat.in_development{border-left-color:var(--btn-orange)}
+  .stat.planned{border-left-color:#c9b800}
+  .bar{background:#fff;padding:12px 16px;flex:1;min-width:220px;display:flex;flex-direction:column;justify-content:center;gap:7px}
+  .bar-track{height:12px;background:var(--group-grey);display:flex;overflow:hidden}
+  .bar-track i{display:block;height:100%}
+  .bar-cap{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:#6b7b8c}
+
+  /* ---------- toolbar ---------- */
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch}
+  .btn{
+    border:none;color:#fff;font-family:inherit;font-size:13px;font-weight:700;
+    padding:14px 20px;cursor:pointer;display:inline-flex;align-items:center;gap:9px;
+    flex:1 1 200px;justify-content:center;text-decoration:none;
+  }
+  .btn:hover{filter:brightness(1.08)}
+  .btn:active{transform:translateY(1px)}
+  .btn.orange{background:var(--btn-orange)}
+  .btn.purple{background:var(--btn-purple)}
+  .btn.blue{background:var(--blue)}
+  .btn.green{background:var(--btn-green)}
+  .search-wrap{flex:1 1 260px;background:#fff;display:flex;align-items:center;gap:8px;padding:0 14px}
+  .search-wrap svg{flex:0 0 auto;opacity:.5}
+  .search-wrap input{border:none;outline:none;font-family:inherit;font-size:13px;width:100%;padding:14px 0;color:inherit;background:transparent}
+
+  /* ---------- table ---------- */
+  .table-panel{background:#fff;flex:1;display:flex;flex-direction:column;min-height:420px}
+  .table-scroll{overflow:auto;max-height:calc(100vh - 90px)}
+  body.expanded .table-scroll{max-height:calc(100vh - 40px)}
+  table{border-collapse:separate;border-spacing:0;width:100%;font-size:12px}
+  thead th{
+    position:sticky;top:0;z-index:3;background:var(--blue);color:#fff;
+    padding:9px 8px;text-align:center;font-weight:700;font-size:12px;
+    border-right:1px solid rgba(255,255,255,.28);white-space:nowrap;
+  }
+  thead th .th-inner{display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;user-select:none}
+  thead th .sort-mark{opacity:.45;font-size:10px}
+  thead th[aria-sort="ascending"] .sort-mark,
+  thead th[aria-sort="descending"] .sort-mark{opacity:1}
+  thead tr.filters th{
+    top:36px;z-index:2;background:#e8f0fa;padding:4px;border-top:1px solid #cfe0f4;
+  }
+  thead tr.filters select,thead tr.filters input{
+    width:100%;min-width:72px;font-family:inherit;font-size:11px;padding:3px 4px;
+    border:1px solid #b9cfe8;background:#fff;color:var(--ink);
+  }
+  tbody td{
+    border-right:1px solid #dcdcdc;border-bottom:1px solid #dcdcdc;
+    padding:5px 7px;vertical-align:middle;
+  }
+  tbody tr:hover td{box-shadow:inset 0 0 0 9999px rgba(1,80,183,.035)}
+  td.group{background:#fff;font-weight:700;font-size:11.5px;vertical-align:middle}
+  td.group.tall{vertical-align:top;padding-top:8px}
+  td.group.tall span{position:sticky;top:76px;display:inline-block}
+  td.group.g0,td.group.g1{text-align:center}   /* Component, Module */
+  td.group.g2,td.group.g3{text-align:left}     /* Submodule, Element */
+  td.text{text-align:left;font-weight:700;font-size:11.5px}
+  td.sym{text-align:center;font-size:13px;font-weight:700;width:74px}
+  td.na{color:var(--na-text);text-align:center;font-size:11px;background:#fff}
+  td.dash{background:var(--group-grey);text-align:center;color:#8a8a8a}
+  td.rel{text-align:center;font-family:var(--font-num);font-size:11.5px;font-weight:700;white-space:nowrap}
+  td.rel.current{outline:1px solid rgba(222,133,37,.55);outline-offset:-1px}
+  td.past{text-align:center;font-family:var(--font-num);font-size:11px;color:#444}
+  .empty-state{padding:48px 24px;text-align:center;color:#6b7b8c}
+  .empty-state strong{display:block;font-size:15px;color:var(--ink);margin-bottom:6px}
+  .rowcount{padding:8px 14px;border-top:1px solid #e3e3e3;font-size:11.5px;color:#6b7b8c;display:flex;gap:14px;flex-wrap:wrap}
+  .rowcount b{font-family:var(--font-num);color:var(--ink)}
+  footer{font-size:11px;color:#3c5a78;padding:2px 4px 8px;display:flex;gap:16px;flex-wrap:wrap}
+
+  .hide{display:none !important}
+  body.expanded .info-row,body.expanded .stats,body.expanded footer{display:none}
+  :focus-visible{outline:3px solid #ff8c00;outline-offset:1px}
+
+  @media (max-width:1000px){
+    .info-row{grid-template-columns:1fr}
+    .masthead{flex-direction:column}
+    .title-bar h1{font-size:19px}
+    .rs-label{min-width:0;flex-basis:100%}
+    .rs-item{flex-wrap:wrap;gap:2px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+  @media print{
+    body{background:#fff}
+    .toolbar,.rowcount,footer,thead tr.filters{display:none}
+    .table-scroll{max-height:none;overflow:visible}
+    thead th{position:static}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="logo">
+      <svg viewBox="0 0 24 32" aria-hidden="true">
+        <path d="M12 0C12 0 2 12.4 2 20a10 10 0 0 0 20 0C22 12.4 12 0 12 0z" fill="#1a72c4"/>
+        <path d="M12 0C12 0 2 12.4 2 20a10 10 0 0 0 10 10V0z" fill="#0a4b96"/>
+      </svg>
+      <span>__ORG__</span>
+    </div>
+    <div class="title-bar"><h1>__HEADING__</h1></div>
+  </header>
+
+  <section class="info-row">
+    <div class="panel">
+      <p>__INTRO__</p>
+      <div class="release-status">
+        <div class="rs-item">
+          <span class="rs-label">Current release</span>
+          <span class="rs-value"><span class="num">__CURRENT_RELEASE__</span> &mdash; promoted to UAT on __UAT_DATE__</span>
+        </div>
+        <div class="rs-item">
+          <span class="rs-label">In development</span>
+          <span class="rs-value"><span class="num">__DEV_RELEASE__</span></span>
+        </div>
+        <div class="rs-item">
+          <span class="rs-label">Next UAT deployment</span>
+          <span class="rs-value"><span class="num">__DEV_RELEASE__</span> &mdash; expected __NEXT_UAT_DATE__</span>
+        </div>
+      </div>
+      <p style="margin-top:12px;font-size:11.5px;color:#555">
+        After each UAT cycle, release notes are published to the SDWIS Program Portal DW-SFTIES site for public view.
+      </p>
+    </div>
+
+    <aside class="panel legend">
+      <h2>Status key</h2>
+      __LEGEND__
+      <div class="legend-item">
+        <span class="swatch" style="background:#fff;border-color:#ccc;color:#8a8a8a">n/a</span>
+        <span> = not applicable</span>
+        <p class="desc">This layer is not part of the functionality.</p>
+      </div>
+    </aside>
+  </section>
+
+  <section class="stats" id="stats"></section>
+
+  <nav class="toolbar">
+    <button class="btn orange" id="btn-expand" type="button" aria-pressed="false">
+      <span aria-hidden="true">⤢</span><span id="expand-label">Expand roadmap</span>
+    </button>
+    <button class="btn purple" id="btn-simple" type="button" aria-pressed="false">
+      <span aria-hidden="true">▤</span><span id="simple-label">Simplified view</span>
+    </button>
+    <a class="btn blue" id="btn-notes" href="__RELEASE_NOTES_URL__" target="_blank" rel="noopener">
+      <span aria-hidden="true">↗</span><span>View release notes</span>
+    </a>
+    <button class="btn green" id="btn-export" type="button">
+      <span aria-hidden="true">⭳</span><span>Export data (CSV)</span>
+    </button>
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M11 10h-.7l-.3-.3a5 5 0 1 0-.7.7l.3.3v.7l4 4 1.2-1.2-4-4zm-4.5 0a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" fill="currentColor"/></svg>
+      <input id="q" type="search" placeholder="Search the whole roadmap…" aria-label="Search the whole roadmap">
+    </div>
+  </nav>
+
+  <section class="table-panel">
+    <div class="table-scroll">
+      <table id="grid">
+        <thead>
+          <tr id="head-row"></tr>
+          <tr class="filters" id="filter-row"></tr>
+        </thead>
+        <tbody id="body"></tbody>
+      </table>
+      <div class="empty-state hide" id="empty">
+        <strong>No rows match these filters.</strong>
+        Clear the search box or reset the column filters to see the full roadmap.
+      </div>
+    </div>
+    <div class="rowcount">
+      <span>Showing <b id="shown">0</b> of <b id="total">0</b> functionality rows</span>
+      <span id="hidden-cols"></span>
+      <button type="button" id="btn-reset" style="border:none;background:none;font-family:inherit;font-size:11.5px;color:var(--blue);cursor:pointer;padding:0;text-decoration:underline">Reset all filters and sorting</button>
+    </div>
+  </section>
+
+  <footer>
+    <span>Source workbook: <b>__SOURCE_FILE__</b></span>
+    <span>Rows read: <b>__ROW_COUNT__</b></span>
+    <span>Built: __BUILD_STAMP__</span>
+  </footer>
+</div>
+
+<script>
+const PAYLOAD = __PAYLOAD_JSON__;
+(function(){
+  "use strict";
+  const cols = PAYLOAD.columns, rows = PAYLOAD.rows, cfg = PAYLOAD.settings;
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  // Colours are shipped once and looked up per cell, keeping the page small.
+  const STATUS = {};
+  PAYLOAD.statuses.forEach(st => { STATUS[st.key] = st; });
+  const REL = PAYLOAD.releaseFills;
+
+  // Search haystack, built here rather than duplicated in the payload.
+  rows.forEach(r => { r.hay = r.cells.join(' ').toLowerCase(); });
+
+  const state = {q:'', filters:{}, sort:{col:null, dir:0}, simple:false, statusChip:null};
+
+  /* ---------- stat chips ---------- */
+  function buildStats(){
+    const s = PAYLOAD.stats, host = $('stats');
+    const chips = [{key:null, cls:'total', n:s.total, label:'Functionality rows'}].concat(
+      PAYLOAD.statuses.map(st => ({key:st.key, cls:st.key, n:s.by_status[st.key]||0, label:st.label}))
+    );
+    host.innerHTML = chips.map(c =>
+      `<button class="stat ${c.cls}" type="button" data-status="${c.key||''}" aria-pressed="false">
+         <span class="n">${c.n}</span><span class="k">${esc(c.label)}</span></button>`
+    ).join('') +
+    `<div class="bar">
+       <div class="bar-track">${PAYLOAD.statuses.map(st =>
+         `<i style="width:${((s.by_status[st.key]||0)/Math.max(s.total,1)*100).toFixed(2)}%;background:${st.fill};border-right:1px solid rgba(0,0,0,.06)" title="${esc(st.label)}"></i>`
+        ).join('')}</div>
+       <span class="bar-cap">${s.pct_complete}% of tracked functionality complete</span>
+     </div>`;
+
+    host.querySelectorAll('.stat').forEach(b => b.addEventListener('click', () => {
+      const k = b.dataset.status || null;
+      state.statusChip = (state.statusChip === k) ? null : k;
+      host.querySelectorAll('.stat').forEach(x =>
+        x.setAttribute('aria-pressed', String((x.dataset.status||null) === state.statusChip)));
+      render();
+    }));
+  }
+
+  /* ---------- header + filters ---------- */
+  function buildHead(){
+    $('head-row').innerHTML = cols.map((c,i) =>
+      `<th data-i="${i}" scope="col"><span class="th-inner" tabindex="0" role="button"
+         aria-label="Sort by ${esc(c.name)}">${esc(c.name)}<span class="sort-mark">⇅</span></span></th>`).join('');
+
+    $('filter-row').innerHTML = cols.map((c,i) => {
+      if (c.choices && c.choices.length){
+        return `<th data-i="${i}"><select data-i="${i}" aria-label="Filter ${esc(c.name)}">
+          <option value="">All</option>${c.choices.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('')}
+        </select></th>`;
+      }
+      return `<th data-i="${i}"><input data-i="${i}" type="search" placeholder="Filter…" aria-label="Filter ${esc(c.name)}"></th>`;
+    }).join('');
+
+    $('filter-row').querySelectorAll('select,input').forEach(el => {
+      el.addEventListener('input', () => {
+        const i = +el.dataset.i;
+        const v = el.value.trim();
+        if (v) state.filters[i] = v.toLowerCase(); else delete state.filters[i];
+        render();
+      });
+    });
+
+    $('head-row').querySelectorAll('.th-inner').forEach(el => {
+      const act = () => {
+        const i = +el.parentElement.dataset.i;
+        if (state.sort.col !== i) state.sort = {col:i, dir:1};
+        else if (state.sort.dir === 1) state.sort.dir = -1;
+        else state.sort = {col:null, dir:0};
+        render();
+      };
+      el.addEventListener('click', act);
+      el.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') { e.preventDefault(); act(); }});
+    });
+  }
+
+  /* ---------- filtering ---------- */
+  function visibleRows(){
+    const q = state.q;
+    let out = rows.filter(r => {
+      if (state.statusChip && r.overall !== state.statusChip) return false;
+      for (const i in state.filters){
+        const cell = String(r.cells[i]||'').toLowerCase();
+        const want = state.filters[i];
+        const col = cols[i];
+        const ok = col.choices && col.choices.length ? cell === want : cell.includes(want);
+        if (!ok) return false;
+      }
+      if (q && !r.hay.includes(q)) return false;
+      return true;
+    });
+    if (state.sort.col !== null){
+      const i = state.sort.col, d = state.sort.dir;
+      out = out.slice().sort((a,b) => {
+        const x = String(a.cells[i]||''), y = String(b.cells[i]||'');
+        const nx = parseFloat(x), ny = parseFloat(y);
+        const cmp = (!isNaN(nx) && !isNaN(ny) && /^[\d.]+$/.test(x) && /^[\d.]+$/.test(y))
+          ? nx - ny : x.localeCompare(y, undefined, {numeric:true});
+        return cmp * d;
+      });
+    }
+    return out;
+  }
+
+  /* ---------- which columns to hide in simplified view ---------- */
+  function hiddenCols(vis){
+    const hidden = new Set();
+    if (!state.simple) return hidden;
+    if (cfg.simplified_hides_past_releases)
+      cols.forEach((c,i) => { if (c.type === 'past') hidden.add(i); });
+    if (cfg.simplified_hides_empty_columns){
+      cols.forEach((c,i) => {
+        if (c.type !== 'status') return;
+        const used = vis.some(r => {
+          const v = String(r.cells[i]||'').trim().toLowerCase();
+          return v && v !== 'n/a' && v !== '-';
+        });
+        if (!used) hidden.add(i);
+      });
+    }
+    return hidden;
+  }
+
+  /* ---------- cell rendering ---------- */
+  function td(cls, text, opts){
+    opts = opts || {};
+    const attrs = [
+      cls ? ` class="${cls}"` : '',
+      opts.span && opts.span > 1 ? ` rowspan="${opts.span}"` : '',
+      opts.style ? ` style="${opts.style}"` : '',
+      opts.title ? ` title="${esc(opts.title)}"` : ''
+    ].join('');
+    return `<td${attrs}>${opts.raw ? text : esc(text)}</td>`;
+  }
+
+  function cellHtml(r, i, span){
+    const col = cols[i], raw = r.cells[i] == null ? '' : String(r.cells[i]);
+    const v = raw.trim();
+    if (col.type === 'status'){
+      const st = STATUS[r.status[i]];
+      if (st) return td('sym', st.symbol, {style:`background:${st.fill};color:${st.text}`, title:st.label});
+      if (v.toLowerCase() === 'n/a') return td('na', 'n/a', {title:'Not applicable'});
+      if (!v || v === '-') return td('dash', '-');
+      return td('sym', v);
+    }
+    if (col.type === 'latest'){
+      const f = r.rel ? REL[r.rel] : null;
+      return td(r.rel === 'current' ? 'rel current' : 'rel', v || '-', {
+        style: f ? `background:${f.fill};color:${f.text}` : '',
+        title: f ? f.label : 'Latest release'
+      });
+    }
+    if (col.type === 'past')
+      return (!v || v === '-') ? td('dash', '-') : td('past', v);
+    if (col.type === 'group'){
+      if (!v || v === '-') return td('dash', '-', {span:span});
+      // Component/Module groups can span hundreds of rows, so the label tracks
+      // the scroll position instead of hiding in the vertical centre.
+      if (col.groupLevel <= 1 && span > 8)
+        return td(`group g${col.groupLevel} tall`, `<span>${esc(v)}</span>`, {span:span, raw:true});
+      return td(`group g${col.groupLevel}`, v, {span:span});
+    }
+    return (!v || v === '-') ? td('dash', '-') : td('text', v);
+  }
+
+  /* ---------- main render, with vertical merging of group columns ---------- */
+  function render(){
+    const vis = visibleRows(), hidden = hiddenCols(vis);
+
+    cols.forEach((c,i) => {
+      document.querySelectorAll(`th[data-i="${i}"]`).forEach(th => th.classList.toggle('hide', hidden.has(i)));
+    });
+
+    // rowspans: a group cell merges downward while its own value AND every
+    // ancestor group value stay the same.
+    const groupIdx = cols.map((c,i) => c.type === 'group' ? i : -1).filter(i => i >= 0);
+    const span = vis.map(() => ({}));
+    groupIdx.forEach((ci, depth) => {
+      const ancestors = groupIdx.slice(0, depth);
+      let start = 0;
+      const blank = r => { const v = String(r.cells[ci]||'').trim(); return !v || v === '-'; };
+      const keyOf = r => ancestors.map(a => r.cells[a]).concat([r.cells[ci]]).join('\u0001');
+      for (let k = 1; k <= vis.length; k++){
+        // Placeholder dashes are never merged — the workbook shows one per row.
+        if (k === vis.length || blank(vis[k]) || blank(vis[start])
+            || keyOf(vis[k]) !== keyOf(vis[start])){
+          span[start][ci] = k - start;
+          for (let m = start+1; m < k; m++) span[m][ci] = 0;
+          start = k;
+        }
+      }
+    });
+
+    const html = vis.map((r, ri) => {
+      let tds = '';
+      cols.forEach((c,i) => {
+        if (hidden.has(i)) return;
+        if (c.type === 'group'){
+          const s = span[ri][i];
+          if (s === 0) return;                 // this cell is covered by a merge above
+          tds += cellHtml(r, i, s);
+        } else {
+          tds += cellHtml(r, i);
+        }
+      });
+      return `<tr>${tds}</tr>`;
+    }).join('');
+
+    $('body').innerHTML = html;
+    $('empty').classList.toggle('hide', vis.length > 0);
+    $('shown').textContent = vis.length;
+    $('total').textContent = rows.length;
+
+    const hc = [...hidden].map(i => cols[i].name);
+    $('hidden-cols').textContent = hc.length ? `Hidden columns: ${hc.join(', ')}` : '';
+
+    cols.forEach((c,i) => {
+      const th = document.querySelector(`#head-row th[data-i="${i}"]`);
+      if (!th) return;
+      th.setAttribute('aria-sort',
+        state.sort.col === i ? (state.sort.dir === 1 ? 'ascending' : 'descending') : 'none');
+      const mark = th.querySelector('.sort-mark');
+      if (mark) mark.textContent = state.sort.col === i ? (state.sort.dir === 1 ? '▲' : '▼') : '⇅';
+    });
+  }
+
+  /* ---------- controls ---------- */
+  $('q').addEventListener('input', e => { state.q = e.target.value.trim().toLowerCase(); render(); });
+
+  $('btn-expand').addEventListener('click', () => {
+    const on = !document.body.classList.contains('expanded');
+    document.body.classList.toggle('expanded', on);
+    $('btn-expand').setAttribute('aria-pressed', String(on));
+    $('expand-label').textContent = on ? 'Collapse text boxes' : 'Expand roadmap';
+  });
+
+  $('btn-simple').addEventListener('click', () => {
+    state.simple = !state.simple;
+    $('btn-simple').setAttribute('aria-pressed', String(state.simple));
+    $('simple-label').textContent = state.simple ? 'Full view' : 'Simplified view';
+    render();
+  });
+
+  $('btn-reset').addEventListener('click', () => {
+    state.q=''; state.filters={}; state.sort={col:null,dir:0}; state.statusChip=null;
+    $('q').value='';
+    document.querySelectorAll('#filter-row select,#filter-row input').forEach(el => el.value='');
+    document.querySelectorAll('.stat').forEach(x => x.setAttribute('aria-pressed','false'));
+    render();
+  });
+
+  $('btn-export').addEventListener('click', () => {
+    const vis = visibleRows(), hidden = hiddenCols(vis);
+    const keep = cols.map((c,i)=>i).filter(i => !hidden.has(i));
+    const q = s => `"${String(s==null?'':s).replace(/"/g,'""')}"`;
+    const lines = [keep.map(i => q(cols[i].name)).join(',')]
+      .concat(vis.map(r => keep.map(i => q(r.cells[i])).join(',')));
+    const blob = new Blob(['\ufeff' + lines.join('\r\n')], {type:'text/csv;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${PAYLOAD.settings.export_basename}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  });
+
+  buildStats(); buildHead(); render();
+})();
+</script>
+</body>
+</html>
