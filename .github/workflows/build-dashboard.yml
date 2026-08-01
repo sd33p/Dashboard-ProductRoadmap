@@ -60,7 +60,7 @@ jobs:
           DASH_UAT_DATE: ${{ inputs.uat_date }}
           DASH_DEV_RELEASE: ${{ inputs.dev_release }}
           DASH_NEXT_UAT_DATE: ${{ inputs.next_uat_date }}
-        run: python scripts/build_dashboard.py
+        run: python build_dashboard.py
 
       - name: Check the page was produced
         run: |
