@@ -1,0 +1,104 @@
+﻿# =============================================================================
+#  DASHBOARD CONFIGURATION
+#  Edit this file (or the "Dashboard Info" sheet inside the Excel workbook)
+#  every time you publish a new release. Values in the Excel sheet win.
+# =============================================================================
+
+# --- Source data ------------------------------------------------------------
+source:
+  excel_file: data/roadmap.xlsx
+  sheet_name: Sheet1            # sheet holding the roadmap table
+  header_row: 1                 # row number containing the column names
+  info_sheet_name: Dashboard Info   # optional sheet that overrides the values below
+
+# --- Release status (update this every 2 months) -----------------------------
+release:
+  # Latest release that has shipped. Cells in the "Latest Release" column
+  # matching this value are highlighted ORANGE.
+  current_release: "0.24"
+
+  # Date the current release was promoted to the UAT environment.
+  current_release_uat_date: "06 June 2026"
+
+  # Release currently being built by the team.
+  release_in_development: "0.25"
+
+  # When that in-development release is expected to reach UAT.
+  next_release_uat_date: "August 2026"
+
+  # Any value in "Latest Release" matching this is highlighted YELLOW.
+  future_release_label: "Future Release"
+
+# --- Page identity ----------------------------------------------------------
+dashboard:
+  title: "DW-SFTIES Product Roadmap"
+  # Leave as "auto" to stamp the build month, or hardcode e.g. "July 2026".
+  as_of_label: "auto"
+  organization: "DW-SFTIES"
+  release_notes_url: "https://www.epa.gov/sdwis/sdwis-program-portal"
+  intro_text: >-
+    This dashboard displays status indicators for the various modules and
+    components that comprise Drinking Water State-Federal-Tribal Information
+    Exchange System (DW-SFTIES) development efforts. Updated after each release,
+    the dashboard also identifies, for each piece of functionality, past and
+    latest releases where development occurred. Please note that a component's
+    status may change from release to release (ex. from "complete" to "under
+    revision") as improvements are identified during development and testing.
+
+# --- Status symbol rules ----------------------------------------------------
+# "match" lists every character that should be treated as that status, so the
+# dashboard keeps working if someone types a slightly different tick mark.
+statuses:
+  - key: complete
+    label: complete
+    symbol: "√"
+    match: ["√", "✓", "✔", "v", "x"]
+    fill: "#d7ffd7"
+    text: "#1d6b2b"
+    description: Functionality has been completed until further improvements are identified.
+  - key: in_development
+    label: under development
+    symbol: "♦"
+    match: ["♦", "◆", "◇", "u", "d"]
+    fill: "#ffe0b2"
+    text: "#8a4b00"
+    description: Functionality is under development.
+  - key: planned
+    label: planned
+    symbol: "●"
+    match: ["●", "•", "o", "p"]
+    fill: "#ffffc3"
+    text: "#7a6a00"
+    description: >-
+      Functionality planned for a future release. If known, the release number
+      will be shown in the Latest Release column.
+
+# --- Table behaviour --------------------------------------------------------
+table:
+  # Columns merged vertically when consecutive rows repeat the same value.
+  group_columns: ["Component", "Module", "Submodule", "Element"]
+  # Columns that hold status symbols.
+  status_columns:
+    ["User Story", "DB", "API", "UI", "DMS", "ODS", "SFDW",
+     "Production Control", "Reporting Services"]
+  latest_release_column: "Latest Release"
+  past_releases_column: "Past Releases"
+  # Simplified view hides status columns that are entirely "n/a" for the rows
+  # currently on screen. Set to false to keep every column visible.
+  simplified_hides_empty_columns: true
+  simplified_hides_past_releases: true
+
+# --- Palette ----------------------------------------------------------------
+theme:
+  blue: "#0150b7"
+  page_blue: "#b6d7ea"
+  ink: "#373737"
+  group_grey: "#e9e9e9"
+  na_text: "#8a8a8a"
+  btn_orange: "#de8525"
+  btn_purple: "#7e56fb"
+  btn_green: "#238b3b"
+
+# --- Output -----------------------------------------------------------------
+output:
+  html_file: docs/index.html
